@@ -2,6 +2,7 @@ import streamlit as st
 import yfinance as yf
 import pandas as pd
 import plotly.graph_objects as go
+import requests
 
 st.set_page_config(layout="wide")
 
@@ -45,26 +46,91 @@ COMMON_MAP = {
     "hdfc": "HDFCBANK.NS",
 }
 
+@st.cache_data(ttl=300)
+def search_candidates(query):
+    query = query.strip()
+    if len(query) < 2:
+        return []
+
+    headers = {"User-Agent": "Mozilla/5.0"}
+    endpoints = [
+        "https://query2.finance.yahoo.com/v1/finance/search",
+        "https://query1.finance.yahoo.com/v1/finance/search",
+    ]
+
+    for url in endpoints:
+        try:
+            response = requests.get(
+                url,
+                params={"q": query, "quotesCount": 8, "newsCount": 0},
+                headers=headers,
+                timeout=5,
+            )
+            response.raise_for_status()
+            payload = response.json()
+            results = []
+
+            for item in payload.get("quotes", []):
+                symbol = item.get("symbol")
+                name = item.get("shortname") or item.get("longname") or symbol
+                exchange = item.get("exchangeDisp") or item.get("exchange") or ""
+                quote_type = item.get("quoteType")
+
+                if not symbol:
+                    continue
+                if quote_type and quote_type not in ["EQUITY", "ETF"]:
+                    continue
+
+                results.append({
+                    "symbol": symbol,
+                    "name": name,
+                    "exchange": exchange,
+                    "label": f"{name} ({symbol})" + (f" - {exchange}" if exchange else ""),
+                })
+
+            if results:
+                unique = []
+                seen = set()
+                for item in results:
+                    if item["symbol"] in seen:
+                        continue
+                    seen.add(item["symbol"])
+                    unique.append(item)
+                return unique
+        except Exception:
+            continue
+
+    return []
+
+
 def resolve_symbol(q):
     q = q.lower().strip().replace("$", "")
 
     for k, v in COMMON_MAP.items():
         if k in q:
-            return v
+            return v, []
+
+    candidates = search_candidates(q)
+    if candidates:
+        upper_q = q.upper()
+        for item in candidates:
+            if item["symbol"].upper() == upper_q:
+                return item["symbol"], candidates
+        return candidates[0]["symbol"], candidates
 
     q = q.upper()
 
     # direct
-    data = yf.download(q, period="5d", interval="1d", progress=False)
+    data = yf.download(q, period="5d", interval="1d", progress=False, threads=False)
     if not data.empty:
-        return q
+        return q, candidates
 
     # NSE fallback
-    data = yf.download(q + ".NS", period="5d", interval="1d", progress=False)
+    data = yf.download(q + ".NS", period="5d", interval="1d", progress=False, threads=False)
     if not data.empty:
-        return q + ".NS"
+        return q + ".NS", candidates
 
-    return None
+    return None, candidates
 
 
 # -----------------------------
@@ -202,10 +268,18 @@ st.title("📊 Stock Analyzer Pro")
 query = st.text_input("Search Stock")
 
 if query:
-    ticker = resolve_symbol(query)
+    ticker, suggestions = resolve_symbol(query)
 
     if not ticker:
-        st.error("Stock not found. Try AAPL / NVDA / RELIANCE / PEP / WASH")
+        st.error("Stock not found.")
+        if suggestions:
+            suggestion_labels = [item["label"] for item in suggestions[:5]]
+            selected_label = st.selectbox("Did you mean", suggestion_labels)
+            ticker = next(item["symbol"] for item in suggestions if item["label"] == selected_label)
+        else:
+            st.info("Try a company name like `Microsoft`, `American Express`, `HSBC`, or an exact ticker like `MSFT`, `AXP`, `HSBC`, `INFY.NS`.")
+
+    if not ticker:
         st.stop()
 
     st.subheader(ticker)
