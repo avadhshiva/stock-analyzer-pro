@@ -116,7 +116,9 @@ def resolve_symbol(q):
         for item in candidates:
             if item["symbol"].upper() == upper_q:
                 return item["symbol"], candidates
-        return candidates[0]["symbol"], candidates
+        if len(candidates) == 1:
+            return candidates[0]["symbol"], candidates
+        return None, candidates
 
     q = q.upper()
 
@@ -270,14 +272,20 @@ query = st.text_input("Search Stock")
 if query:
     ticker, suggestions = resolve_symbol(query)
 
-    if not ticker:
+    if suggestions:
+        suggestion_labels = [item["label"] for item in suggestions[:8]]
+        default_index = 0
+        if ticker:
+            for idx, item in enumerate(suggestions[:8]):
+                if item["symbol"] == ticker:
+                    default_index = idx
+                    break
+        selected_label = st.selectbox("Matching stocks", suggestion_labels, index=default_index)
+        ticker = next(item["symbol"] for item in suggestions if item["label"] == selected_label)
+
+    elif not ticker:
         st.error("Stock not found.")
-        if suggestions:
-            suggestion_labels = [item["label"] for item in suggestions[:5]]
-            selected_label = st.selectbox("Did you mean", suggestion_labels)
-            ticker = next(item["symbol"] for item in suggestions if item["label"] == selected_label)
-        else:
-            st.info("Try a company name like `Microsoft`, `American Express`, `HSBC`, or an exact ticker like `MSFT`, `AXP`, `HSBC`, `INFY.NS`.")
+        st.info("Try a company name like `Microsoft`, `American Express`, `HSBC`, `Adani`, or an exact ticker like `MSFT`, `AXP`, `HSBC`, `INFY.NS`.")
 
     if not ticker:
         st.stop()
