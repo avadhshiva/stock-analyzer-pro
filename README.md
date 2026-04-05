@@ -10,6 +10,10 @@ A Streamlit-based stock analysis dashboard inspired by Zerodha, Groww, and Paytm
 
 This project helps users search stocks, inspect price action across multiple timeframes, review technical signals, and simulate paper trades with simple risk controls.
 
+## Live App
+
+Primary app: [stock-analyzer-pro-v2.streamlit.app](https://stock-analyzer-pro-v2.streamlit.app/)
+
 ## Why This Project
 
 Retail traders and investors often want a simple place to:
@@ -42,6 +46,7 @@ Stock Analyzer Pro is designed as a lightweight dashboard that brings those work
 
 ## Demo And Deployment
 
+- Primary live app: [stock-analyzer-pro-v2.streamlit.app](https://stock-analyzer-pro-v2.streamlit.app/)
 - Local app: run with `streamlit run app.py`
 - GitHub repo: [stock-analyzer-pro](https://github.com/avadhshiva/stock-analyzer-pro)
 - Deploy option: Streamlit Community Cloud, Render, or any Python-friendly hosting platform
