@@ -1,8 +1,25 @@
 # Stock Analyzer Pro
 
+![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-App-red?logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-Charts-3f4f75?logo=plotly&logoColor=white)
+![Yahoo Finance](https://img.shields.io/badge/Data-Yahoo%20Finance-5f01d1)
+![Status](https://img.shields.io/badge/Status-Active-success)
+
 A Streamlit-based stock analysis dashboard inspired by Zerodha, Groww, and Paytm Money.
 
 This project helps users search stocks, inspect price action across multiple timeframes, review technical signals, and simulate paper trades with simple risk controls.
+
+## Why This Project
+
+Retail traders and investors often want a simple place to:
+
+- search stocks quickly
+- switch between intraday and higher timeframes
+- understand technical indicators without opening multiple tools
+- experiment with trade setups without risking capital
+
+Stock Analyzer Pro is designed as a lightweight dashboard that brings those workflows into one Streamlit app.
 
 ## What This App Does
 
@@ -22,6 +39,14 @@ This project helps users search stocks, inspect price action across multiple tim
 - Multiple chart timeframes from intraday to monthly
 - Paper trading with basic risk management
 - Trade dashboard with simple PnL tracking
+
+## Demo And Deployment
+
+- Local app: run with `streamlit run app.py`
+- GitHub repo: [stock-analyzer-pro](https://github.com/avadhshiva/stock-analyzer-pro)
+- Deploy option: Streamlit Community Cloud, Render, or any Python-friendly hosting platform
+
+If you deploy this app publicly, you can add the live link here later.
 
 ## Supported Timeframes
 
@@ -93,6 +118,19 @@ http://localhost:8501
 - `EMA 21`
 - `RSI`
 - `VWAP`
+
+## Folder Structure
+
+```text
+.
+|-- app.py
+|-- indicators.py
+|-- trade_engine.py
+|-- utils.py
+|-- requirements.txt
+|-- trades.json
+`-- screenshots/
+```
 
 ## Roadmap
 
